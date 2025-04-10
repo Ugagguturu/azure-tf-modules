@@ -35,14 +35,14 @@ resource "azurerm_network_interface" "nic" {
   }
 }
 
-
-resource "azurerm_windows_virtual_machine" "vm" {
-  name                = "myVM"
+resource "azurerm_linux_virtual_machine" "vm" {
+  name                = "myLinuxVM"
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
   size                = "Standard_B1s"
   admin_username      = var.admin_username
-  admin_password      = var.admin_password
+  admin_password      = var.admin_password  # or use SSH keys instead (recommended for prod)
+
   network_interface_ids = [
     azurerm_network_interface.nic.id,
   ]
@@ -50,13 +50,15 @@ resource "azurerm_windows_virtual_machine" "vm" {
   os_disk {
     caching              = "ReadWrite"
     storage_account_type = "Standard_LRS"
-    name                 = "myOSDisk"
+    name                 = "myLinuxOSDisk"
   }
 
   source_image_reference {
-    publisher = "MicrosoftWindowsServer"
-    offer     = "WindowsServer"
-    sku       = "2019-Datacenter"
+    publisher = "OpenLogic"
+    offer     = "CentOS"
+    sku       = "8_5"
     version   = "latest"
   }
+
+  disable_password_authentication = false  # set to true if you're using SSH instead
 }
